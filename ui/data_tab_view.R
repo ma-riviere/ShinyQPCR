@@ -19,7 +19,7 @@ tabItem(
     
     
     tabPanel(
-      "Information",
+      "Entrez Info",
       br(),
       fluidRow(
         box(

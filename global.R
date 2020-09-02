@@ -1,32 +1,66 @@
+#########################
+# Managing dependencies #
+#########################
+
 print("[INFO] Setting up globals")
 
-project_packages <- c("renv", "here", "glue", "styler", "remotes")
+project_packages <- c()
 
 "%ni%" <- Negate("%in%")
 
+Sys.setenv(MAKEFLAGS = "-j4")
+
+options(install.packages.check.source = "no")
+
+get_pkg_name <- function(pkg) {
+  pkg_name <- pkg
+  if (grepl("/", pkg, fixed = TRUE)) {
+    pkg_path <- stringr::str_split(pkg, "/")[[1]]
+    pkg_name <- pkg_path[length(pkg_path)]
+  }
+  return(pkg_name)
+}
+
+activate_packages <- function() {
+  for (pkg in project_packages) {
+    activate_package(pkg)
+  }
+}
+
+activate_package <- function(pkg) {
+  pkg_name <- get_pkg_name(pkg)
+  if (pkg_name %in% installed.packages()) {
+    library(pkg_name, character.only = TRUE, quiet=TRUE)
+  }
+}
+
 update_packages <- function(pkgs) {
   for (pkg in pkgs) {
-    if (pkg %ni% project_packages) {
+    if(pkg %ni% project_packages) {
       project_packages <<- c(project_packages, pkg)
     }
   }
-  #print(project_packages)
-
+  
+  
   for (pkg in project_packages) {
-    if (!(pkg %in% installed.packages())) {
-      if (grepl("/", pkg, fixed = TRUE)) {
-        remotes::install_github(pkg)
+    
+    pkg_name <- get_pkg_name(pkg)
+    
+    if(!(pkg_name %in% installed.packages())) {
+      if(grepl("/", pkg, fixed=TRUE)) {
+        remotes::install_github(pkg, upgrade = "never", quiet = TRUE, auth_token = Sys.getenv("GITHUB_PAT_R_INSTALL")) # repos = ""
       } else {
-        install.packages(pkg, character.only = TRUE) #, type = "binary"
+        install.packages(pkg, character.only = TRUE, type = "binary", quiet = TRUE, verbose = FALSE)
       }
+      
     }
-
-    if (pkg %in% installed.packages()) {
-      library(pkg, character.only = TRUE)
-    }
+    activate_package(pkg)
   }
-  if (!("renv" %in% installed.packages())) renv::snapshot(type = "all", prompt = F)
+  renv::snapshot(type="all", prompt=F)
+  #knitr::write_bib(c(.packages(), project_packages), here::here("res/bib", "packages.bib"))
 }
+
+update_packages(c("renv", "here", "glue", "styler", "remotes"))
 
 # -------------------------------------------------------------
 
@@ -48,6 +82,8 @@ pkg_list <- c(
   "ipc",
   "magrittr",
   "conflicted",
+  "fitdistrplus",
+  "goftest",
   "janitor",
   "stringr",
   "shinydashboard",
@@ -72,6 +108,7 @@ update_packages(pkg_list)
 
 library(here)
 library(glue)
+library(remotes)
 library(shiny)
 library(shinyjs)
 library(tidyverse)
@@ -81,6 +118,9 @@ library(future)
 library(future.callr)
 library(ipc)
 library(magrittr)
+library(conflicted)
+library(fitdistrplus)
+library(goftest)
 library(janitor)
 library(stringr)
 library(shinydashboard)
@@ -105,6 +145,9 @@ conflicted::conflict_prefer("isolate", "shiny", quiet = T)
 conflicted::conflict_prefer("layout", "plotly", quiet = T)
 
 alpha <- 0.05
+trend <- 0.1
+threshold.reg <- 1
+
 set.seed(42)
 
 colors <- c("#00AFBB", "#FF7373")

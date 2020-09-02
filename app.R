@@ -37,6 +37,7 @@ ui <- dashboardPage(header = header, sidebar = sidebar, body = body) # skin = "b
 
 source(here("utils", "entrez.R"), echo = FALSE)
 source(here("utils", "data.R"), local = TRUE, echo = FALSE)
+
 source(here("ui", "modal.R"),  local = TRUE)$value
 
 source(here("server", "data_tab_module.R"),  local = TRUE)$value

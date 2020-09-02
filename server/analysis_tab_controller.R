@@ -15,7 +15,7 @@ output$fit <- DT::renderDT({
   ) %>%
     formatRound(5:ncol(fit_react()), 3) %>%
     formatStyle(
-      "SW.p",
+      c("SW.p", "AD.p", "SW.p.resid"),
       color = styleInterval(alpha, c("red", "gray")),
       fontWeight = styleInterval(alpha, c("bold", "normal")),
     ) %>%
@@ -27,8 +27,6 @@ output$fit <- DT::renderDT({
 })
 
 ### QQ Plot stack
-
-#### TODO: one QQ for Normal & inverse.gaussian fits
 
 observe({
   req(df_react())
@@ -58,8 +56,6 @@ observe({
 })
 
 ### Fit hist stack
-
-#### TODO: add Normal & inverse.gaussian fits
 
 observe({
   req(df_react())
