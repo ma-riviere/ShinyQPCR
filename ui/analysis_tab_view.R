@@ -66,6 +66,23 @@ tabItem(
           )
         )
       )
+    ),
+    
+    tabPanel(
+      "Regulation",
+      br(),
+      fluidRow(
+        box(
+          width = 12,
+          title = "Regulation Heatmap",
+          status = "primary",
+          solidHeader = TRUE,
+          collapsible = TRUE,
+          fluidRow(
+            plotOutput("heatmap") %>% withSpinner()
+          )
+        )
+      )
     )
   )
 )

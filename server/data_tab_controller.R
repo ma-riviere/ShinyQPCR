@@ -3,20 +3,22 @@
 ## Tables
 
 output$data <- DT::renderDT({
+  df <- df_react() %>% select(-t.p, -expression)
   datatable(
-    df_react(),
+    df,
     class = "cell-border stripe compact",
     filter = "top",
     options = list(
       pageLength = 25,
       autoWidth = TRUE
     )
-  ) %>% formatRound(5:ncol(df_react()), 3)
+  ) %>% formatRound(5:ncol(df), 3)
 })
 
 output$ncbi <- DT::renderDT({
   datatable(
-    ncbi_react(),
+    ncbi_react() %>% mutate(gene = get.gene_link(gene, gene.id)) %>% select(-gene.id),
+    escape = FALSE,
     class = "cell-border stripe compact",
     filter = "none",
     options = list(

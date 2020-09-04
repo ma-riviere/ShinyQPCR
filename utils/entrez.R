@@ -122,7 +122,7 @@ parse_ncbi <- function(genes) {
     
     ## Extract NM_ sequences (multiple)
     
-    nm.data <- parse_gene_data(gene.data)
+    nm.data <- parse_gene_data(gene.data) %>% mutate(gene.id = gene.ids.filtered[1])
     nm.ids <- nm.data$id
     
     ## Extract Nuccore IDs for each NM_ sequence

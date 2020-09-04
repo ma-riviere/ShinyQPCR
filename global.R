@@ -60,7 +60,7 @@ update_packages <- function(pkgs) {
   #knitr::write_bib(c(.packages(), project_packages), here::here("res/bib", "packages.bib"))
 }
 
-update_packages(c("renv", "here", "glue", "styler", "remotes"))
+# update_packages(c("renv", "here", "glue", "styler", "remotes"))
 
 # -------------------------------------------------------------
 
@@ -75,6 +75,8 @@ pkg_list <- c(
   "shiny",
   "shinyjs",
   "tidyverse",
+  "ggnewscale",
+  'gtools',
   "rlist",
   "promises",
   "future",
@@ -101,7 +103,7 @@ pkg_list <- c(
   "rsconnect"
 )
 
-update_packages(pkg_list)
+# update_packages(pkg_list)
 
 #TODO: detect the platform: if shinyapps ...
 #TODO: automatically write those library()
@@ -112,6 +114,8 @@ library(remotes)
 library(shiny)
 library(shinyjs)
 library(tidyverse)
+library(gtools)
+library(ggnewscale)
 library(rlist)
 library(promises)
 library(future)
@@ -151,6 +155,7 @@ threshold.reg <- 1
 set.seed(42)
 
 colors <- c("#00AFBB", "#FF7373")
+layer.order <- c("EGL", "ML", "PC", "IGL", "WM")
 
 # -------------------------------------------------------------
 

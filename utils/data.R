@@ -1,6 +1,6 @@
 data_loaded <- FALSE
 
-data_path <- here("data", "Data_P12_HI.xlsx")
+data_path <- here("data", "data2.xlsx")
 
 gm_mean = function(x, na.rm=TRUE){
   exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
@@ -34,6 +34,8 @@ get_regulation_type <- function(fold_change, p_value) {
   )
 }
 
+get_stars <- function(expr, p.val) {ifelse(expr == regulation_type$NOT_REG, "", gtools::stars.pval(p.val))}
+
 # -------------------------------------------------------------
 
 df <- data.frame()
@@ -57,6 +59,8 @@ load_data <- function(file_path) {
     janitor::clean_names() %>%
     rename(gene = target_name, sample = sample_name, ct = ct_mean, dct = d_ct) %>%
     mutate(condition = ifelse(endsWith(sample, "N"), "N", "H"), .after = "sample") %>%
+    mutate(condition = factor(condition, levels = c("N", "H"))) %>%
+    # mutate(couche = factor(couche, levels = layer.order)) %>%
     select(sample, couche, gene, condition, ct, dct) %>% 
     group_by(couche, gene, condition) %>% 
     mutate(avg.dct = gm_mean(dct)) %>% 
@@ -71,8 +75,13 @@ load_data <- function(file_path) {
     group_by(couche, gene, condition) %>%
     mutate(fold = mean(two)) %>%
     ungroup() %>% 
-    select(sample, couche, gene, condition, dct, fold) %>%
-    mutate(condition = factor(condition, levels = c("N", "H"))) %>%
+    group_by(couche, gene) %>%
+    mutate(
+      t.p = t.test(dct ~ condition, var.equal = FALSE)$p.value,
+      expression = ifelse(is.na(dct) | is.na(fold), NA, get_regulation_type(fold, t.p))
+    ) %>%
+    ungroup() %>%
+    select(sample, couche, gene, condition, dct, fold, t.p, expression) %>%
     arrange(couche, gene, condition, sample)
 }
 
@@ -162,11 +171,20 @@ compute_statistics <- function(data) {
 
 # -------------------------------------------------------------
 
+get.nm_link <- function(nm.id) {
+  glue('<a href="https://www.ncbi.nlm.nih.gov/nuccore/{nm.id}" target="_blank">{nm.id}</a>')
+}
+
+get.gene_link <- function(gene, gene.id) {
+  glue('<a href="https://www.ncbi.nlm.nih.gov/gene/{gene.id}" target="_blank">{gene}</a>')
+}
+
 fetch_ncbi_info <- function(data) {
   data %>%
     distinct(gene) %>%
     arrange(gene) %>%
-    pull(gene) %>% head(1) %>%
+    pull(gene) %>%
     parse_ncbi() %>% 
-    select(-rna.seq)
+    select(-rna.seq) %>% 
+    mutate(nm.id = get.nm_link(nm.id))
 }

@@ -28,7 +28,7 @@ render_qq_stack <- function(input, output, session, data, options) {
     ggplotly(qq) %>%
       layout(
         xaxis = list(title = "Theoretical"),
-        yaxis = list(title = "Sample") # range = c(0,9)
+        yaxis = list(title = "Observed") # range = c(0,9)
       )
   })
 }

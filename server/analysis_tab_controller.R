@@ -4,8 +4,6 @@
 
 ### Fit table
 
-#### TODO: add Normal & inverse.gaussian fits
-
 output$fit <- DT::renderDT({
   datatable(
     fit_react(),
@@ -146,3 +144,29 @@ observe({
       options = list()
     ))
 })
+
+output$heatmap <- renderPlot(expr = {
+  df_react() %>% 
+    select(-sample) %>%
+    filter(condition == "H") %>%
+    ggplot(aes(x=couche, y=gene)) +
+    geom_tile(data = . %>% filter(expression == regulation_type$NOT_REG), fill="grey70", colour="white") +
+    geom_tile(data = . %>% filter(expression == regulation_type$MAYBE_UPREG), fill="darkolivegreen3", colour="white") +
+    geom_tile(data = . %>% filter(expression == regulation_type$MAYBE_DOWNREG), fill="darkorange2", colour="white") +
+    geom_tile(data = . %>% filter(expression == regulation_type$UPREG), aes(fill=fold), colour="white") +
+    scale_fill_gradient(name=regulation_type$UPREG, low="seagreen1", high="seagreen4") + 
+    new_scale_fill() +
+    geom_tile(data = . %>% filter(expression == regulation_type$DOWNREG), aes(fill=fold), colour="white") +
+    scale_fill_gradient(name=regulation_type$DOWNREG, low="firebrick4", high="firebrick1") + 
+    geom_text(aes(label = paste0(round(fold, 3), get_stars(expression, t.p), sep="")), size = 3, colour = "white", fontface = "bold") +
+    coord_fixed(ratio = 0.25) +
+    theme_minimal() +
+    theme(
+      legend.text=element_text(face="bold"),
+      axis.ticks=element_line(size=0.4),
+      panel.grid.major = element_blank(),
+    ) +
+    ylab("Gene") +
+    xlab("Couche")
+},
+res = 76)
