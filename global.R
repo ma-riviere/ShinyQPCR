@@ -75,6 +75,13 @@ pkg_list <- c(
   "shiny",
   "shinyjs",
   "tidyverse",
+  "broom",
+  # "lmerTest",
+  # "broom.mixed",
+  # "emmeans",
+  # "optimx",
+  # "pbkrtest",
+  # "performance",
   "ggnewscale",
   'gtools',
   "rlist",
@@ -86,6 +93,7 @@ pkg_list <- c(
   "conflicted",
   "fitdistrplus",
   "goftest",
+  "nortest",
   "janitor",
   "stringr",
   "shinydashboard",
@@ -99,11 +107,13 @@ pkg_list <- c(
   "effsize",
   "pwr",
   "rentrez",
+  "knitr",
+  # "kableExtra",
   "XML",
   "rsconnect"
 )
 
-# update_packages(pkg_list)
+update_packages(pkg_list)
 
 #TODO: detect the platform: if shinyapps ...
 #TODO: automatically write those library()
@@ -114,6 +124,11 @@ library(remotes)
 library(shiny)
 library(shinyjs)
 library(tidyverse)
+library(broom)
+library(lmerTest)
+library(broom.mixed)
+library(optimx)
+library(performance)
 library(gtools)
 library(ggnewscale)
 library(rlist)
@@ -147,6 +162,7 @@ conflicted::conflict_prefer("select", "dplyr", quiet = T)
 conflicted::conflict_prefer("box", "shinydashboard", quiet = T)
 conflicted::conflict_prefer("isolate", "shiny", quiet = T)
 conflicted::conflict_prefer("layout", "plotly", quiet = T)
+conflicted::conflict_prefer("extract", "tidyr", quiet = T)
 
 alpha <- 0.05
 trend <- 0.1

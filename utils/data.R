@@ -1,6 +1,6 @@
 data_loaded <- FALSE
 
-data_path <- here("data", "data2.xlsx")
+data_path <- here("data", "data3.xlsx")
 
 gm_mean = function(x, na.rm=TRUE){
   exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
@@ -103,6 +103,7 @@ compute_summary <- function(data) {
 compute_fit <- function(data) {
   data %>%
     group_by(couche, gene) %>%
+    # Create models (lm & lmer)
     mutate(
       SW.p.resid = shapiro.test(residuals(lm(dct ~ condition), type = "response"))$p.value
     ) %>%
