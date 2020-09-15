@@ -1,4 +1,4 @@
-print("[INFO] Loading rentrez utils functions")
+print("[DEBUG][ENTREZ] Loading rentrez utils functions")
 
 parse_gene_data <- function(gene.data) {
   coms <- xpathApply(gene.data, "//Gene-commentary_products/Gene-commentary", parse_gene_commentary)

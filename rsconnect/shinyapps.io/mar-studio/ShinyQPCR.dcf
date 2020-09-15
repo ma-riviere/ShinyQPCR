@@ -5,9 +5,9 @@ account: mar-studio
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2612441
-bundleId: 3592183
+bundleId: 3630494
 url: https://mar-studio.shinyapps.io/ShinyQPCR/
-when: 1599210800.44146
+when: 1600157464.45618
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .gitattributes|.RData|.Rprofile|README.md|data/data1.xlsx|tests/test.Rmd
+ignoredFiles: .gitattributes|.RData|.Rprofile|tests

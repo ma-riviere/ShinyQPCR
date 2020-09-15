@@ -1,3 +1,5 @@
+print("[DEBUG][SERVER] Loading Utils")
+
 get_genes <- function(layers) {
   if (is.null(layers) || length(layers) == 0) layers <- "None"
   

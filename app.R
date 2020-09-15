@@ -2,6 +2,8 @@ source("global.R", echo = FALSE)
 
 ########################################[ UI ]########################################
 
+print("[INFO] Loading UI")
+
 header <- dashboardHeader(
   title = shinyDashboardLogo(
     theme = "blue_gradient",
@@ -35,10 +37,12 @@ ui <- dashboardPage(header = header, sidebar = sidebar, body = body) # skin = "b
 
 #######################################[ Server ]#######################################
 
-source(here("utils", "entrez.R"), echo = FALSE)
+print("[INFO] Loading Server")
+
+# source(here("utils", "entrez.R"), echo = FALSE)
 source(here("utils", "data.R"), local = TRUE, echo = FALSE)
 
-source(here("ui", "modal.R"),  local = TRUE)$value
+source(here("ui", "modal.R"), local = TRUE)$value
 
 source(here("server", "data_tab_module.R"),  local = TRUE)$value
 source(here("server", "analysis_tab_module.R"),  local = TRUE)$value
@@ -47,6 +51,8 @@ server <- function(input, output, session) {
   
   #shinyjs::onevent("beforeunload", "window", onStop()) #function (e) { e.preventDefault(); e.returnValue = ''; }
   
+  print("[DEBUG][SERVER] Starting Server")
+  
   # Loading data
   
   showModal(landing_modal())
@@ -54,6 +60,8 @@ server <- function(input, output, session) {
   observe({
     toggleState(id = "start", condition = ifelse(input$data_source == "upload", !is.null(input$file), TRUE))
   })
+  
+  data_path <- here("data", "data.xlsx")
   
   observeEvent(input$start, {
     removeModal()
@@ -76,13 +84,13 @@ server <- function(input, output, session) {
   
   # ----------------------------------------
   
-  q <- queue()
-
-  onStop <- function() {
-    q$producer$fireEval(stop("Stop that child"))
-    q$destroy()
-    stopApp()
-  }
+  # q <- queue()
+  # 
+  # onStop <- function() {
+  #   q$producer$fireEval(stop("Stop that child"))
+  #   q$destroy()
+  #   stopApp()
+  # }
   
   # Starting the application
   
@@ -96,7 +104,7 @@ server <- function(input, output, session) {
     source(here("server", "analysis_tab_controller.R"),  local = TRUE)$value
     
     session$onSessionEnded(function() {
-      onStop()
+      # onStop()
     })
   })
 }

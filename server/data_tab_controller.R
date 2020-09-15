@@ -3,7 +3,7 @@
 ## Tables
 
 output$data <- DT::renderDT({
-  df <- df_react() %>% select(-t.p, -expression)
+  df <- df_react() %>% select(-p.val, -expression)
   datatable(
     df,
     class = "cell-border stripe compact",
@@ -15,18 +15,18 @@ output$data <- DT::renderDT({
   ) %>% formatRound(5:ncol(df), 3)
 })
 
-output$ncbi <- DT::renderDT({
-  datatable(
-    ncbi_react() %>% mutate(gene = get.gene_link(gene, gene.id)) %>% select(-gene.id),
-    escape = FALSE,
-    class = "cell-border stripe compact",
-    filter = "none",
-    options = list(
-      pageLength = 25,
-      autoWidth = TRUE
-    )
-  )
-})
+# output$ncbi <- DT::renderDT({
+#   datatable(
+#     ncbi_react() %>% mutate(gene = get.gene_link(gene, gene.id)) %>% select(-gene.id),
+#     escape = FALSE,
+#     class = "cell-border stripe compact",
+#     filter = "none",
+#     options = list(
+#       pageLength = 25,
+#       autoWidth = TRUE
+#     )
+#   )
+# })
 
 output$summary <- DT::renderDT({
   datatable(

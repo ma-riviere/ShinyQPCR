@@ -1,5 +1,11 @@
+print("[DEBUG][SERVER] Loading Modal")
+
 landing_modal <- function(failed = FALSE) {
+  
+  # print("[DEBUG][SERVER] Starting Modal")
+  
   data_loaded <<- FALSE
+  
   modalDialog(
     title = "Choose your data:",
     h3("Please choose a dataset to use :", align = "center"),

@@ -8,7 +8,7 @@ project_packages <- c()
 
 "%ni%" <- Negate("%in%")
 
-Sys.setenv(MAKEFLAGS = "-j4")
+# Sys.setenv(MAKEFLAGS = "-j4")
 
 options(install.packages.check.source = "no")
 
@@ -64,13 +64,6 @@ update_packages <- function(pkgs) {
 
 # -------------------------------------------------------------
 
-options(install.packages.check.source = "no")
-options(dplyr.print_min = 6, dplyr.print_max = 6, scipen = 999, digits = 5)
-options(spinner.color = "#0dc5c1")
-options(shiny.maxRequestSize = 30 * 1024^2)
-
-# -------------------------------------------------------------
-
 pkg_list <- c(
   "shiny",
   "shinyjs",
@@ -81,7 +74,9 @@ pkg_list <- c(
   # "emmeans",
   # "optimx",
   # "pbkrtest",
-  # "performance",
+  "performance",
+  "insight",
+  "effectsize",
   "ggnewscale",
   'gtools',
   "rlist",
@@ -91,14 +86,14 @@ pkg_list <- c(
   "ipc",
   "magrittr",
   "conflicted",
-  "fitdistrplus",
+  # "fitdistrplus",
   "goftest",
   "nortest",
   "janitor",
   "stringr",
   "shinydashboard",
   "dashboardthemes",
-  "shinydashboardPlus",
+  # "shinydashboardPlus",
   "shinycssloaders",
   "DT",
   "plotly",
@@ -113,22 +108,22 @@ pkg_list <- c(
   "rsconnect"
 )
 
-update_packages(pkg_list)
+# update_packages(pkg_list)
 
 #TODO: detect the platform: if shinyapps ...
 #TODO: automatically write those library()
 
+print("[INFO] Loading libraries")
+
 library(here)
 library(glue)
-# library(remotes)
 library(shiny)
 library(shinyjs)
 library(tidyverse)
 library(broom)
-# library(lmerTest)
-# library(broom.mixed)
-# library(optimx)
-# library(performance)
+library(performance)
+library(insight)
+library(effectsize)
 library(gtools)
 library(ggnewscale)
 library(rlist)
@@ -138,9 +133,9 @@ library(future.callr)
 library(ipc)
 library(magrittr)
 library(conflicted)
-library(fitdistrplus)
-library(goftest)
-# library(nortest)
+# library(fitdistrplus)
+# library(goftest)
+library(nortest)
 library(janitor)
 library(stringr)
 library(shinydashboard)
@@ -157,6 +152,8 @@ library(XML)
 
 # -------------------------------------------------------------
 
+print("[INFO] Loading options")
+
 conflicted::conflict_prefer("filter", "dplyr", quiet = T)
 conflicted::conflict_prefer("group_by", "dplyr", quiet = T)
 conflicted::conflict_prefer("select", "dplyr", quiet = T)
@@ -164,6 +161,11 @@ conflicted::conflict_prefer("box", "shinydashboard", quiet = T)
 conflicted::conflict_prefer("isolate", "shiny", quiet = T)
 conflicted::conflict_prefer("layout", "plotly", quiet = T)
 conflicted::conflict_prefer("extract", "tidyr", quiet = T)
+
+options(install.packages.check.source = "no")
+options(dplyr.print_min = 6, dplyr.print_max = 6, scipen = 999, digits = 5)
+options(spinner.color = "#0dc5c1")
+options(shiny.maxRequestSize = 30 * 1024^2)
 
 alpha <- 0.05
 trend <- 0.1
@@ -176,12 +178,18 @@ layer.order <- c("EGL", "ML", "PC", "IGL", "WM")
 
 # -------------------------------------------------------------
 
+print("[INFO] Loading entrez")
+
 ekey <- Sys.getenv("ENTREZ_KEY")
 if(!is.null(ekey) & ekey != "") {
   print(glue("[INFO] Entrez API Key detected and loaded: {ekey}"))
-  set_entrez_key(ekey)
+  rentrez::set_entrez_key(ekey)
 } else {
   print("[INFO] No Entrez API Key detected. Please specify one as the ENTREZ_KEY environment variable.")
 }
 
-plan(callr)
+# -------------------------------------------------------------
+
+# print("[INFO] Loading parallel options")
+
+# plan(callr)

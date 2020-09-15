@@ -18,20 +18,20 @@ tabItem(
     ),
     
     
-    tabPanel(
-      "Entrez Info",
-      br(),
-      fluidRow(
-        box(
-          width = 12,
-          title = "NCBI (Entrez) data",
-          status = "primary",
-          solidHeader = TRUE,
-          collapsible = TRUE,
-          DT::dataTableOutput("ncbi") %>% withSpinner()
-        )
-      )
-    ),
+    # tabPanel(
+    #   "Entrez Info",
+    #   br(),
+    #   fluidRow(
+    #     box(
+    #       width = 12,
+    #       title = "NCBI (Entrez) data",
+    #       status = "primary",
+    #       solidHeader = TRUE,
+    #       collapsible = TRUE,
+    #       DT::dataTableOutput("ncbi") %>% withSpinner()
+    #     )
+    #   )
+    # ),
     
     
     tabPanel(
