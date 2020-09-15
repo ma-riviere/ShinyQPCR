@@ -12,13 +12,15 @@ tabItem(
           status = "primary",
           solidHeader = TRUE,
           collapsible = TRUE,
-          DT::dataTableOutput("fit") %>% withSpinner()
+          DT::dataTableOutput("fit") %>% withSpinner(),
+          downloadButton("dl.fit.all", label = "All"),
+          downloadButton("dl.fit.filtered", label = "Filtered")
         )
       ),
       fluidRow(
         box(
           width = 6,
-          title = "QQ Plot",
+          title = "QQ Plot of Residuals",
           status = "primary",
           solidHeader = TRUE,
           collapsible = TRUE,
@@ -28,7 +30,7 @@ tabItem(
         ),
         box(
           width = 6,
-          title = "Histogram fit",
+          title = "Histogram of Residuals",
           status = "primary",
           solidHeader = TRUE,
           collapsible = TRUE,
@@ -50,7 +52,9 @@ tabItem(
           status = "primary",
           solidHeader = TRUE,
           collapsible = TRUE,
-          DT::dataTableOutput("statistics") %>% withSpinner()
+          DT::dataTableOutput("statistics") %>% withSpinner(),
+          downloadButton("dl.stats.all", label = "All"),
+          downloadButton("dl.stats.filtered", label = "Filtered")
         )
       ),
       br(),
@@ -69,7 +73,7 @@ tabItem(
     ),
     
     tabPanel(
-      "Regulation",
+      "Heatmap",
       br(),
       fluidRow(
         box(
@@ -80,6 +84,8 @@ tabItem(
           collapsible = TRUE,
           fluidRow(
             plotOutput("heatmap") %>% withSpinner()
+            # downloadButton("dl.hm.full", label = "All"),
+            # downloadButton("dl.hm.filtered", label = "Filtered")
           )
         )
       )

@@ -3,7 +3,7 @@
 ## Tables
 
 output$data <- DT::renderDT({
-  df <- df_react() %>% select(-p.val, -expression)
+  df <- df_react() %>% select(couche, gene, sample, litter, condition, dct, fold)
   datatable(
     df,
     class = "cell-border stripe compact",
@@ -12,8 +12,18 @@ output$data <- DT::renderDT({
       pageLength = 25,
       autoWidth = TRUE
     )
-  ) %>% formatRound(5:ncol(df), 3)
+  ) %>% formatRound(6:ncol(df), digits = 4)
 })
+
+output$dl.raw.all <- downloadHandler(
+  filename = function() {"raw_data_full.xlsx"},
+  content = function(file) {writexl::write_xlsx(df %>% select(couche, gene, sample, litter, condition, dct, fold), path = file)}
+)
+
+output$dl.raw.filtered <- downloadHandler(
+  filename = function() {"raw_data_filtered.xlsx"},
+  content = function(file) {writexl::write_xlsx(df_react() %>% select(couche, gene, sample, litter, condition, dct, fold), path = file)}
+)
 
 # output$ncbi <- DT::renderDT({
 #   datatable(
@@ -38,7 +48,7 @@ output$summary <- DT::renderDT({
       autoWidth = TRUE
     )
   ) %>%
-    formatRound(5:ncol(summary_react()), 3) # %>% formatStyle("sd", color = styleInterval(0.7, c("gray", "orange")))
+    formatRound(5:ncol(summary_react()), 4) # %>% formatStyle("sd", color = styleInterval(0.7, c("gray", "orange")))
 })
 
 
@@ -53,7 +63,10 @@ observe({
     mutate(X = if_else(input$histograms_response_type == "dct", dct, fold)) %>%
     ungroup() %>%
     group_by(couche, gene, condition) %>%
-    mutate(med = if_else(input$histograms_response_type == "dct", median(dct), median(fold))) %>%
+    mutate(
+      med = median(X),
+      mean = mean(X),
+    ) %>%
     ungroup() %>%
     mutate(uid = paste0(couche, " - ", gene))
 

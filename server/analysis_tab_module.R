@@ -17,11 +17,11 @@ make_qq_stack <- function(id) {
 render_qq_stack <- function(input, output, session, data, options) {
   output$my_qq <- renderPlotly({
     qq <- data %>%
-      ggplot(aes(sample = dct, colour = condition)) + # group = gene
-      geom_qq() +
-      geom_qq_line() +
-      scale_color_manual(values = colors) +
-      facet_wrap(~condition) +
+      ggplot(aes(sample = resid)) + # group = gene, colour = litter
+      geom_qq(color = "skyblue2") +
+      geom_qq_line(color = "skyblue2") +
+      # scale_color_manual(values = colors) +
+      # facet_wrap(~condition) +
       theme_minimal() +
       theme(legend.position = "none", axis.title.x = element_blank(), axis.title.y = element_blank())
     
@@ -44,41 +44,29 @@ make_fit_stack <- function(id) {
     box(
       width = 12,
       title = id,
-      plotlyOutput(ns("my_fit"))
+      plotOutput(ns("my_fit"))
     )
   )
 }
 
 render_fit_stack <- function(input, output, session, data, options) {
   
-  # norm.fit <- fitdist(data$dct, "norm")$estimate
-  # gof.norm <- ad.test(data$dct, "norm", norm.fit[1], norm.fit[2])$p.value %>% round(4)
+  norm.fit <- fitdistrplus::fitdist(data$resid, "norm")$estimate
+  # gof.norm <- goftest::ad.test(data$resid, "norm", norm.fit[1], norm.fit[2])$p.value %>% round(4)
   
-  output$my_fit <- renderPlotly({
-    fit <- data %>%
-      group_by(condition) %>%
-      mutate(mean = mean(dct)) %>%
-      ungroup() %>%
-      ggplot(aes(x = dct, fill = condition, color = condition)) +
-      scale_fill_manual(values = colors) +
-      scale_color_manual(values = colors) +
-      geom_histogram(aes(y = ..density..), binwidth = 0.5, alpha = 0.8, fill = "white", boundary = 1) +
-      # geom_density(kernel = "gaussian") + #adjust = 5
-      # geom_function(fun = dnorm, args = norm.fit, size = 1.3) + #aes(color = glue("Norm : {gof.norm}"))
-      # geom_function(fun = dlnorm, args = lognorm.fit, aes(color = glue("Log.Norm : {gof.lnorm}")), size = 1.3) +
-      # geom_function(fun = dgamma, args = gamma.fit, aes(color = glue("Gamma : {gof.gamma}")), size = 1.3) +
+  output$my_fit <- renderPlot({
+    data %>%
+      ggplot(aes(x = resid)) +
+      geom_histogram(aes(y = ..density..), binwidth = length(resid) / 5, alpha = 0.8, color = "skyblue2", fill = "skyblue2", boundary = 1) +
+      geom_function(fun = dnorm, args = norm.fit, size = 1.3, color = "firebrick4") + #aes(color = glue("Norm : {gof.norm}"))
       theme_minimal() +
-      theme(legend.position = "none", axis.title.x = element_blank(), axis.title.y = element_blank()) +
-      facet_wrap(. ~ condition) +
-      geom_vline(aes(xintercept = med, group = condition, color = condition, label = "Median"), linetype = "dashed", size = 1) +
-      #ggrepel::geom_text_repel(aes(x = med + 0.1 * (max(dct) - min(dct)), label = round(med, 2), y = -0.05)) +
-      geom_vline(aes(xintercept = mean, group = condition, color = condition, label = "Mean"), size = 1)
-      #ggrepel::geom_text_repel(aes(x = mean - 0.1 * (max(dct) - min(dct)), label = round(mean, 2), y = -0.05))
-    
-    ggplotly(fit) %>%
-      layout(
-        xaxis = list(title = "Delta CT"),
-        yaxis = list(title = "Density")
+      labs(x = "Residuals", y = "Density") +
+      theme(
+        legend.position = "none",
+        legend.title = element_blank(), 
+        axis.title.x = element_text(size = (20)), 
+        axis.title.y = element_text(size = (20)), 
+        # legend.text = element_text(size = (16))
       )
   })
 }

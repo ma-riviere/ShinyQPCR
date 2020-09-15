@@ -12,7 +12,9 @@ tabItem(
           status = "primary",
           solidHeader = TRUE,
           collapsible = TRUE,
-          DT::dataTableOutput("data") %>% withSpinner()
+          DT::dataTableOutput("data") %>% withSpinner(),
+          downloadButton("dl.raw.all", label = "All"),
+          downloadButton("dl.raw.filtered", label = "Filtered")
         )
       )
     ),

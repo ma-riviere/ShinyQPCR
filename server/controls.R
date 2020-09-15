@@ -13,14 +13,11 @@ summary_react <- reactive({
   summary %>% filter_data(input$layers, input$genes)
 })
 
-compute_models(df)
-
 fit <- compute_fit(df)
 
 fit_react <- reactive({
   fit %>% filter_data(input$layers, input$genes)
 })
-
 
 statistics <- compute_statistics(df)
 

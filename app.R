@@ -61,7 +61,7 @@ server <- function(input, output, session) {
     toggleState(id = "start", condition = ifelse(input$data_source == "upload", !is.null(input$file), TRUE))
   })
   
-  data_path <- here("data", "data.xlsx")
+  data_path <- here("data", "data2.xlsx")
   
   observeEvent(input$start, {
     removeModal()
@@ -96,6 +96,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$start, {
     req(data_loaded)
+    
+    print("[DEBUG][SERVER] Starting Analysis")
 
     source(here("server", "controls.R"),  local = TRUE)$value
     source(here("server", "utils.R"),  local = TRUE)$value

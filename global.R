@@ -86,7 +86,7 @@ pkg_list <- c(
   "ipc",
   "magrittr",
   "conflicted",
-  # "fitdistrplus",
+  "fitdistrplus",
   "goftest",
   "nortest",
   "janitor",
@@ -103,8 +103,9 @@ pkg_list <- c(
   "pwr",
   "rentrez",
   "knitr",
-  # "kableExtra",
+  "kableExtra",
   "XML",
+  "writexl",
   "rsconnect"
 )
 
@@ -133,8 +134,8 @@ library(future.callr)
 library(ipc)
 library(magrittr)
 library(conflicted)
-# library(fitdistrplus)
-# library(goftest)
+library(fitdistrplus)
+library(goftest)
 library(nortest)
 library(janitor)
 library(stringr)
@@ -148,6 +149,7 @@ library(moments)
 library(effsize)
 library(pwr)
 library(rentrez)
+library(writexl)
 library(XML)
 
 # -------------------------------------------------------------

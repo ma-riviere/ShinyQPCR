@@ -13,11 +13,26 @@ output$fit <- DT::renderDT({
   ) %>%
     formatRound(5:ncol(fit_react()), 3) %>%
     formatStyle(
-      c("levene.p", "resid.SW.p", "resid.AD.p"),
+      c("p.val", "levene.p", "resid.SW.p", "resid.AD.p"),
       color = styleInterval(alpha, c("red", "gray")),
       fontWeight = styleInterval(alpha, c("bold", "normal")),
+    ) %>%
+    formatStyle(
+      "r2",
+      color = styleInterval(c(0.2, 0.5, 0.8), c("gray", "orange", "#C4DC17", "green")),
+      fontWeight = styleInterval(0.8, c("normal", "bold"))
     )
 })
+
+output$dl.fit.all <- downloadHandler(
+  filename = function() {"fit_data_full.xlsx"},
+  content = function(file) {writexl::write_xlsx(fit, path = file)}
+)
+
+output$dl.fit.filtered <- downloadHandler(
+  filename = function() {"fit_data_filtered.xlsx"},
+  content = function(file) {writexl::write_xlsx(fit_react(), path = file)}
+)
 
 ### QQ Plot stack
 
@@ -26,9 +41,10 @@ observe({
   req(input$layers, input$genes)
   
   df_temp <- df_react() %>%
-    group_by(couche, gene, condition) %>%
-    mutate(med = median(dct)) %>%
-    ungroup() %>%
+    # group_by(couche, gene, condition) %>%
+    # mutate(med = median(dct)) %>%
+    # ungroup() %>%
+    rename(resid = lm.resid) %>%
     mutate(uid = paste0(couche, " - ", gene))
   
   
@@ -55,9 +71,10 @@ observe({
   req(input$layers, input$genes)
   
   df_temp <- df_react() %>%
-    group_by(couche, gene, condition) %>%
-    mutate(med = median(dct)) %>%
-    ungroup() %>%
+    # group_by(couche, gene, condition) %>%
+    # mutate(med = median(dct)) %>%
+    # ungroup() %>%
+    rename(resid = lm.resid) %>%
     mutate(uid = paste0(couche, " - ", gene))
   
   
@@ -77,6 +94,8 @@ observe({
     ))
 })
 
+### TODO: S-L plot
+
 ## Statistics
 
 ### Significance
@@ -88,16 +107,12 @@ output$statistics <- DT::renderDT({
     filter = "none",
     options = list(pageLength = 25, autoWidth = TRUE)
   ) %>%
-    formatRound(3:(ncol(statistics_react())-2), 3) %>%
-    formatStyle("levene.p",
-                color = styleInterval(alpha, c("red", "gray")),
-                fontWeight = styleInterval(alpha, c("bold", "normal"))
-    ) %>%
-    formatStyle("p.val",
+    formatRound(c(5:8, 10), 4) %>%
+    formatStyle(c("p.val", "levene.p"),
                 color = styleInterval(c(alpha, 0.1), c("green", "#C4DC17", "gray")),
                 fontWeight = styleInterval(alpha, c("bold", "normal"))
     ) %>%
-    formatStyle("Hedge.g",
+    formatStyle(c("Hedge.g", "r2"),
                 color = styleInterval(c(0.2, 0.5, 0.8), c("gray", "orange", "#C4DC17", "green")),
                 fontWeight = styleInterval(0.8, c("normal", "bold"))
     ) %>%
@@ -110,6 +125,16 @@ output$statistics <- DT::renderDT({
                 fontWeight = styleInterval(c(1, 10), c("normal", "bold", "normal"))
     )
 })
+
+output$dl.stats.all <- downloadHandler(
+  filename = function() {"stats_data_full.xlsx"},
+  content = function(file) {writexl::write_xlsx(statistics, path = file)}
+)
+
+output$dl.stats.filtered <- downloadHandler(
+  filename = function() {"stats_data_filtered.xlsx"},
+  content = function(file) {writexl::write_xlsx(statistics_react(), path = file)}
+)
 
 ### Box stack:
 
@@ -140,8 +165,10 @@ observe({
     ))
 })
 
-output$heatmap <- renderPlot(
-  df_react() %>% 
+## Heatmap
+
+make.heatmap <- function(data) {
+  data %>% 
     select(-sample) %>%
     filter(condition == "H") %>%
     ggplot(aes(x=couche, y=gene)) +
@@ -163,4 +190,19 @@ output$heatmap <- renderPlot(
     ) +
     ylab("Gene") +
     xlab("Couche")
+}
+
+output$heatmap <- renderPlot(
+  make.heatmap(df_react())
 )
+
+output$dl.hm.full <- downloadHandler(
+  filename = function() {"heatmap_full.png"},
+  content = function(file) {ggsave(file, make.heatmap(df), dpi=320, scale=1)}
+)
+
+output$dl.hm.filtered <- downloadHandler(
+  filename = function() {"heatmap_filtered.png"},
+  content = function(file) {ggsave(file, make.heatmap(df_react()), dpi=320, scale=1)}
+)
+

@@ -1,0 +1,13 @@
+name: ShinyQPCR2
+title: ShinyQPCR2
+username:
+account: mar-studio
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2816205
+bundleId: 3632932
+url: https://mar-studio.shinyapps.io/ShinyQPCR2/
+when: 1600205534.66315
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .gitattributes|.RData|.Rprofile|README.md|data/data.xlsx|tests
