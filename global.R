@@ -111,8 +111,8 @@ pkg_list <- c(
 
 # update_packages(pkg_list)
 
-#TODO: detect the platform: if shinyapps ...
-#TODO: automatically write those library()
+# TODO: automatically write those library() in an external R script and source it from the app.R
+## TODO: detect the platform: only source that file if shinyapps 
 
 print("[INFO] Loading libraries")
 
@@ -176,7 +176,7 @@ threshold.reg <- 1
 set.seed(42)
 
 colors <- c("#00AFBB", "#FF7373")
-layer.order <- c("EGL", "ML", "PC", "IGL", "WM")
+layer.order <- c("EGL", "EGLo", "EGLi", "ML", "PC", "IGL", "WM")
 
 # -------------------------------------------------------------
 

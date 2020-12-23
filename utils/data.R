@@ -106,7 +106,7 @@ load_data <- function(file_path) {
       lm.resid = resid(lm.mod[[1]], type = "response"),
       
       # p.val = tidy(car::Anova(lm.mod[[1]], white.adjust = TRUE))$p.value[1],
-      p.val = t.test(insight::get_data(lm.mod[[1]]) %>% filter(condition == "H") %>% pull(dct), insight::get_data(lm.mod[[1]]) %>% filter(condition == "N") %>% pull(dct), var.equa = FALSE)$p.value,
+      p.val = t.test(insight::get_data(lm.mod[[1]]) %>% filter(condition == "H") %>% pull(dct), insight::get_data(lm.mod[[1]]) %>% filter(condition == "N") %>% pull(dct), var.equal = FALSE)$p.value,
       
       expression = get_regulation_type(fold, p.val)
     ) %>%

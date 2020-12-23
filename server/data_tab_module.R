@@ -27,7 +27,7 @@ render_hist_stack <- function(input, output, session, data, options) {
       facet_wrap(. ~ condition) +
       # geom_vline(aes(xintercept = med, group = condition, color = condition), linetype = "dashed", size = 1) +
       geom_vline(aes(xintercept = med, group = condition, color = condition, label = "Median"), linetype = "dashed", size = 1) +
-      geom_vline(aes(xintercept = mean, group = condition, color = condition, label = "Mean"), size = 1)
+      geom_vline(aes(xintercept = mean, group = condition, color = condition, label = "Mean"), size = 1) +
       geom_text(aes(x = med + 0.1 * (max(X) - min(X)), label = round(med, 2), y = -0.05)) # TODO: (get max of the density) + 0.1 * (max - min)
     
     ggplotly(hist) %>%
