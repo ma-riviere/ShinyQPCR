@@ -4,13 +4,43 @@
 
 print("[INFO] Setting up globals")
 
-project_packages <- c()
+set.github_pat <- function(env.var) {
+  github.pat <- Sys.getenv(env.var)
+  if (github.pat != "") {
+    print(paste("[INFO] Found GITHUB Access Token: ", github.pat))
+    GITHUB_PAT <- github.pat
+  }
+}
+
+set.install_type <- function() {
+  sys.name <- Sys.info()[["sysname"]]
+  if (sys.name == "Windows") {
+    print("[INFO] Windows detected, installing packages as 'binary'")
+    options(install.packages.check.source = "no")
+    return("binary")
+  } else if (sys.name == "Linux") {
+    print("[INFO] Linux detected, installing packages as 'source'")
+    options(install.packages.check.source = "yes")
+    return("source")
+  } else {
+    print("[INFO] No install type setup for your system, using 'source' as default")
+    options(install.packages.check.source = "yes")
+    return("source")
+  }
+}
+
+set.github_pat("GITHUB_PAT_R_INSTALL")
+pkg.install.type <- set.install_type()
 
 "%ni%" <- Negate("%in%")
 
-# Sys.setenv(MAKEFLAGS = "-j4")
+Sys.setenv(MAKEFLAGS = "-j4")
 
-options(install.packages.check.source = "no")
+# -------------------------------------------
+
+suppressPackageStartupMessages(TRUE)
+
+project_packages <- c()
 
 get_pkg_name <- function(pkg) {
   pkg_name <- pkg
@@ -18,7 +48,23 @@ get_pkg_name <- function(pkg) {
     pkg_path <- stringr::str_split(pkg, "/")[[1]]
     pkg_name <- pkg_path[length(pkg_path)]
   }
+  if (grepl("@", pkg_name, fixed = TRUE)) {
+    pkg_path <- stringr::str_split(pkg, "@")[[1]]
+    pkg_name <- pkg_path[1]
+  }
+  # print(pkg_name)
   return(pkg_name)
+}
+
+get_pkg_version <- function(pkg) {
+  pkg_version <- NA_character_
+  
+  if (grepl("@", pkg, fixed = TRUE)) {
+    pkg_path <- stringr::str_split(pkg, "@")[[1]]
+    pkg_version <- pkg_path[length(pkg_path)]
+  }
+  # print(pkg_version)
+  return(pkg_version)
 }
 
 activate_packages <- function() {
@@ -34,6 +80,28 @@ activate_package <- function(pkg) {
   }
 }
 
+pkg_is_installed <- function(pkg) {
+  
+  is_installed <- FALSE
+  pkg_name <- get_pkg_name(pkg)
+  
+  if(pkg_name %in% installed.packages()) {
+    pkg_version <- get_pkg_version(pkg)
+    if(!is.na(pkg_version)) {
+      if(pkg_version == packageVersion(pkg_name)) {
+        # Packaged is installed and version required matches the installed one
+        # print(glue("Package {pkg_name} is already installed"))
+        is_installed <- TRUE
+      }
+    } else {
+      # Package is installed and no specific version was asked for
+      # print(glue("Package {pkg_name} is already installed"))
+      is_installed <- TRUE
+    }
+  }
+  return(is_installed)
+}
+
 update_packages <- function(pkgs) {
   for (pkg in pkgs) {
     if(pkg %ni% project_packages) {
@@ -41,28 +109,35 @@ update_packages <- function(pkgs) {
     }
   }
   
-  
   for (pkg in project_packages) {
     
-    pkg_name <- get_pkg_name(pkg)
-    
-    if(!(pkg_name %in% installed.packages())) {
-      if(grepl("/", pkg, fixed=TRUE)) {
-        remotes::install_github(pkg, upgrade = "never", quiet = TRUE, auth_token = Sys.getenv("GITHUB_PAT_R_INSTALL")) # repos = ""
-      } else {
-        install.packages(pkg, character.only = TRUE, type = "binary", quiet = TRUE, verbose = FALSE)
-      }
-      
+    if(!pkg_is_installed(pkg)) {
+      # remotes::install_github(pkg, upgrade = "never", quiet = TRUE)
+      renv::install(pkg, type = pkg.install.type, quiet = TRUE, verbose = FALSE) #character.only = TRUE,  repos = "http://cran.r-project.org"
     }
     activate_package(pkg)
   }
   renv::snapshot(type="all", prompt=F)
-  #knitr::write_bib(c(.packages(), project_packages), here::here("res/bib", "packages.bib"))
 }
 
-# update_packages(c("renv", "here", "glue", "styler", "remotes"))
+# update_packages(c("renv", "here", "glue", "styler", "remotes", "magrittr", "miniUI", "tools"))
 
-# -------------------------------------------------------------
+
+remove_dependencies <- function(pkg, recursive = FALSE) {
+  d <- package_dependencies(, installed.packages(), recursive = recursive)
+  depends <- if (!is.null(d[[pkg]])) d[[pkg]] else character()
+  needed <- unique(unlist(d[!names(d) %in% c(pkg, depends)]))
+  toRemove <- depends[!depends %in% needed]
+  if (length(toRemove)) {
+    toRemove <- select.list(c(pkg, sort(toRemove)), multiple = TRUE, title = "Select packages to remove")
+    remove.packages(toRemove)
+    return(toRemove)
+  } else {
+    invisible(character())
+  }
+}
+
+# ----------------------------------------------------------------------------
 
 pkg_list <- c(
   "shiny",

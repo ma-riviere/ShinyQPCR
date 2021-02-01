@@ -137,7 +137,7 @@ compute_fit <- function(data) {
   data %>% 
     group_by(couche, gene) %>%
     mutate(
-      levene.p = tidy(car::leveneTest(insight::find_formula(lm.mod[[1]])$conditional, data = insight::get_data(lm.mod[[1]]))) %>% filter(term == "group") %>% pull(p.value),
+      levene.p = tidy(car::leveneTest(insight::find_formula(lm.mod[[1]])$conditional, data = insight::get_data(lm.mod[[1]]))) %>% filter(row_number() == 1) %>% pull(p.value),
       # lm.BIC = BIC(lm.mod[[1]]),
       resid.SW.p = shapiro.test(lm.resid)$p.value,
       resid.AD.p = nortest::ad.test(lm.resid)$p.value,
@@ -160,13 +160,13 @@ compute_statistics <- function(data) {
       across(where(is.numeric), mean),
       across(where(is.character), first),
       
-      levene.p = tidy(car::leveneTest(insight::find_formula(lm.mod[[1]])$conditional, data = insight::get_data(lm.mod[[1]]))) %>% filter(term == "group") %>% pull(p.value),
+      levene.p = tidy(car::leveneTest(insight::find_formula(lm.mod[[1]])$conditional, data = insight::get_data(lm.mod[[1]]))) %>% filter(row_number() == 1) %>% pull(p.value),
       
       # lm.es = abs(standardize_parameters(lm.mod[[1]])$Std_Coefficient[[2]]),
       
-      Hedge.g = hedges_g(
+      Hedge.g = effectsize::hedges_g(
         insight::find_formula(lm.mod[[1]])$conditional,
-        correction = TRUE,
+        correction = 1,
         data = insight::get_data(lm.mod[[1]]),
         pooled_sd = ifelse(levene.p <= alpha, FALSE, TRUE),
       )$Hedges_g %>% abs(),
