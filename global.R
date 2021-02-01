@@ -176,7 +176,7 @@ threshold.reg <- 1
 set.seed(42)
 
 colors <- c("#00AFBB", "#FF7373")
-layer.order <- c("EGL", "EGLo", "EGLi", "ML", "PC", "IGL", "WM")
+layer.order <- c("EGL", "EGLo", "EGLi", "ML", "MLPC", "PC", "IGL", "WM")
 
 # -------------------------------------------------------------
 
