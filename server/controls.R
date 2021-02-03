@@ -4,26 +4,26 @@ print("[DEBUG][SERVER] Loading Controls")
 
 df_react <- reactive({
   df %>% filter_data(input$layers, input$genes)
-})
+}) %>% bindEvent(input$go)
 
 
 summary <- compute_summary(df)
 
 summary_react <- reactive({
   summary %>% filter_data(input$layers, input$genes)
-})
+}) %>% bindEvent(input$go)
 
 fit <- compute_fit(df)
 
 fit_react <- reactive({
   fit %>% filter_data(input$layers, input$genes)
-})
+}) %>% bindEvent(input$go)
 
 statistics <- compute_statistics(df)
 
 statistics_react <- reactive({
   statistics %>% filter_data(input$layers, input$genes)
-})
+}) %>% bindEvent(input$go)
 
 # ncbi <- reactiveVal()
 # # being.fetched <- reactiveVal()

@@ -18,6 +18,7 @@ sidebar <- dashboardSidebar(
     #checkboxInput("filter_signi", "Regulated only", value = FALSE),
     uiOutput("dynamic_layer_selection"),
     uiOutput("dynamic_gene_selection"),
+    actionButton("go", "Go", width = "80%"),
     br()
     #TODO: list packages used and provide email for feedback/contact
     # tags$div("© 2020 RIVIERE Marc-Aurèle, license MIT", align="bottom")
