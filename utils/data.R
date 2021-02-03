@@ -2,9 +2,9 @@ print("[DEBUG][SERVER] Loading Data.R")
 
 data_loaded <- FALSE
 
-gm_mean = function(x, na.rm=TRUE){
-  exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
-}
+# gm_mean = function(x, na.rm=TRUE){
+#   exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
+# }
 
 regulation_type_enum <- function() {
   list(
@@ -36,6 +36,66 @@ get_regulation_type <- function(fold_change, p_value) {
 
 get_stars <- function(expr, p.val) {ifelse(expr == regulation_type$NOT_REG, "", gtools::stars.pval(p.val))}
 
+add_fold_change <- function(dat) {
+  return(dat
+         %>% mutate.(
+           avg.dct = mean(dct),
+           avg.N = mean(dct),
+           .by = c(couche, gene, condition)
+         )
+         %>% mutate.(avg.N = ifelse(condition == "N", avg.N, NA))
+         %>% fill.(
+           avg.N,
+           .direction = "down",
+           .by = c(couche, gene)
+         )
+         %>% mutate.(ddct = avg.dct - avg.N)
+         %>% mutate.(two = 2**(-ddct))
+         %>% mutate.(
+           fold = mean(two),
+           .by = c(couche, gene, condition)
+         )
+  )
+}
+
+add_expression <- function(dat) {
+  return(dat
+         %>% mutate.(
+           p.val = t.test(dct ~ condition, var.equal = FALSE)$p.value,
+           .by = c(couche, gene)
+         )
+         %>% mutate.(
+           expression = ifelse(condition == "H", get_regulation_type(fold, p.val), NA),
+           .by = c(couche, gene)
+         )
+         %>% fill.(
+           expression,
+           .direction = "up",
+           .by = c(couche, gene)
+         )
+  )
+}
+
+add_models <- function(dat) {
+  return(dat %>%
+           nest_by(couche, gene, .key = "dta")
+         %>% mutate(lm.mod = list(lm(dct ~ condition, data = dta)))
+         %>% select.(-dta)
+         %>% inner_join.(dat, by = c("couche", "gene"))
+         %>% group_by(couche, gene)
+         %>% mutate(
+           n.H = insight::get_data(lm.mod[[1]]) %>% filter(condition == "H") %>% nrow(),
+           n.N = insight::get_data(lm.mod[[1]]) %>% filter(condition == "N") %>% nrow(),
+           lm.resid = resid(lm.mod[[1]], type = "response"),
+           lm.cooksd = cooks.distance(lm.mod[[1]]),
+           
+           p.val = tidy(car::Anova(lm.mod[[1]], white.adjust = TRUE))$p.value[1],
+           # p.val = t.test(insight::get_data(lm.mod[[1]]) %>% filter(condition == "H") %>% pull(dct), insight::get_data(lm.mod[[1]]) %>% filter(condition == "N") %>% pull(dct), var.equa = FALSE)$p.value,
+           expression = get_regulation_type(fold, p.val)
+         )
+  )
+}
+
 # -------------------------------------------------------------
 
 df <- data.frame()
@@ -54,111 +114,81 @@ parse_data <- function(file_path) {
 # -------------------------------------------------------------
 
 load_data <- function(file_path) {
-  raw.data <- readxl::excel_sheets(file_path) %>% 
-    purrr::set_names() %>% 
-    purrr::map_df(~ readxl::read_excel(path = file_path, sheet = .x), .id = "couche") %>%
-    janitor::clean_names() %>%
-    rename(gene = target_name, sample = sample_name, ct = ct_mean, dct = d_ct) %>%
-    ## Extracting columns from Sample
-    extract(sample, into = c("experiment", "litter", "pup", "condition"), regex = "([A-Z])([A-Z]+)([0-9]+)(H|N)", convert = TRUE, remove = FALSE) %>%
-    # select(sample, couche, gene, condition, ct, dct) %>%
-    ## Adding Fold change
-    group_by(couche, gene, condition) %>%
-    mutate(avg.dct = mean(dct)) %>% #gm_mean
-    mutate(avg.N = mean(dct)) %>% #gm_mean
-    ungroup() %>%
-    mutate(avg.N = ifelse(condition == "N", avg.N, NA)) %>%
-    group_by(couche, gene) %>%
-    mutate(avg.N = ifelse(is.na(avg.N), mean(avg.N, na.rm = TRUE), avg.N)) %>%
-    ungroup() %>%
-    mutate(ddct = avg.dct - avg.N) %>%
-    mutate(two = 2**-ddct) %>%
-    group_by(couche, gene, condition) %>%
-    mutate(fold = mean(two)) %>%
-    ungroup() %>% 
-    ## Adding model data (gof, significance, ...)
-    #TODO replace with models
-    group_by(couche, gene) %>%
-    mutate(
-      p.val = t.test(dct ~ condition, var.equal = FALSE)$p.value,
-      expression = ifelse(is.na(dct) | is.na(fold), NA, get_regulation_type(fold, p.val))
-    ) %>%
-    ungroup() %>%
-    ## Selecting / arranging data
-    select(couche, sample, litter, gene, condition, dct, fold, p.val, expression) %>%
-    mutate(condition = factor(condition, levels = c("N", "H"))) %>%
-    arrange(couche, gene, condition, sample)
-  
-  raw.data %>%
-    ## Adding models
-    group_by(couche, gene) %>%
-    do(
-      lm.mod = lm(dct ~ condition, data = .)
-      # lmer.mod = lmerTest::lmer(dct ~ condition + (1 | litter), data = ., control = my.lmer.control.params, REML = TRUE)
-    ) %>%
-    ## Merging
-    inner_join(raw.data, by = c("couche", "gene")) %>%
-    ## Adding residuals
-    group_by(couche, gene) %>%
-    mutate(
-      n.H = insight::get_data(lm.mod[[1]]) %>% filter(condition == "H") %>% nrow(),
-      n.N = insight::get_data(lm.mod[[1]]) %>% filter(condition == "N") %>% nrow(),
-      lm.resid = resid(lm.mod[[1]], type = "response"),
-      
-      # p.val = tidy(car::Anova(lm.mod[[1]], white.adjust = TRUE))$p.value[1],
-      p.val = t.test(insight::get_data(lm.mod[[1]]) %>% filter(condition == "H") %>% pull(dct), insight::get_data(lm.mod[[1]]) %>% filter(condition == "N") %>% pull(dct), var.equal = FALSE)$p.value,
-      
-      expression = get_regulation_type(fold, p.val)
-    ) %>%
-    ungroup() %>%
-    select(couche, gene, sample, litter, condition, p.val, dct, fold, expression, n.N, n.H, lm.mod, lm.resid) %>%
-    mutate(across(where(is.numeric), round, 4)) %>%
-    arrange(couche, gene, condition, sample)
+  return(readxl::excel_sheets(file_path)
+         %>% purrr::set_names()
+         %>% map_df.(~ readxl::read_excel(path = file_path, sheet = .x), .id = "couche")
+         %>% select.(couche, sample = matches("sample"), gene = matches("target"), ct = starts_with("ct"), dct = matches("dct"))
+         %>% extract(sample, into = c("experiment", "litter", "pup", "condition"), regex = "([A-Z]+)([A-Z]+)([0-9]+)(H|N)", convert = TRUE, remove = FALSE)
+         %>% select.(-c(experiment, pup))
+         %>% drop_na.(dct)
+         %>% add_fold_change()
+         %>% add_expression()
+         # %>% mutate.(Stade = stade)
+         # %>% add_sex()
+         # %>% add_pathway()
+         ## Selecting / arranging data
+         %>% mutate.(condition = factor(condition, levels = c("N", "H")))
+         %>% add_models()
+         %>% select.(couche, gene, sample, litter, condition, p.val, dct, fold, expression, n.N, n.H, lm.mod, lm.resid)
+         %>% mutate_across.(where(is.numeric), round, 4)
+         %>% arrange.(couche, gene, condition, sample)
+  )
 }
+
+# load_stades <- function(liste_stades) {
+#   map_df.(liste_stades, ~ load_stade(.x)) %>% 
+#     mutate.(
+#       Condition = factor(Condition, levels = c("N", "H")),
+#       Couche = factor(Couche, levels = layer.order),
+#       Stade = factor(Stade, levels = liste_stades)
+#     ) %>%
+#     arrange.(Stade, Couche, Gene, Condition, Sex)
+# }
 
 # -------------------------------------------------------------
 
 compute_summary <- function(data) {
-  data %>%
-    group_by(couche, gene, condition) %>%
-    summarize(
-      n = n(),
+  return(data
+    %>% summarize.(
+      n = n.(),
       mean = mean(dct),
       median = median(dct),
-      sd = sd(dct)
-    ) %>% 
-    ungroup()
+      sd = sd(dct),
+      .by = c(couche, gene, condition)
+    )
+  )
 }
 
 # -------------------------------------------------------------
 
 
 compute_fit <- function(data) {
-  data %>% 
-    group_by(couche, gene) %>%
-    mutate(
+  return(data
+    %>% group_by(couche, gene)
+    %>% mutate(
       levene.p = tidy(car::leveneTest(insight::find_formula(lm.mod[[1]])$conditional, data = insight::get_data(lm.mod[[1]]))) %>% filter(row_number() == 1) %>% pull(p.value),
       # lm.BIC = BIC(lm.mod[[1]]),
       resid.SW.p = shapiro.test(lm.resid)$p.value,
       resid.AD.p = nortest::ad.test(lm.resid)$p.value,
       r2 = max(r2(lm.mod[[1]])$R2_adjusted[[1]], 0),
-    ) %>%
-    select(couche, gene, p.val, levene.p, resid.SW.p, resid.AD.p, r2) %>%
-    summarize(
+    )
+    %>% select(couche, gene, p.val, levene.p, resid.SW.p, resid.AD.p, r2)
+    %>% summarize(
       n = n(),
       across(where(is.numeric), mean),
-    ) %>%
-    mutate(across(where(is.numeric), round, 4))
+    ) 
+    %>% mutate(across(where(is.numeric), round, 4))
+  )
 }
 
 # -------------------------------------------------------------
 
 compute_statistics <- function(data) {
-  data %>%
-    group_by(couche, gene) %>%
-    summarize(
+  return(data
+    %>% group_by(couche, gene)
+    %>% summarize(
       across(where(is.numeric), mean),
-      across(where(is.character), first),
+      across(where(is.character), dplyr::first),
       
       levene.p = tidy(car::leveneTest(insight::find_formula(lm.mod[[1]])$conditional, data = insight::get_data(lm.mod[[1]]))) %>% filter(row_number() == 1) %>% pull(p.value),
       
@@ -189,9 +219,10 @@ compute_statistics <- function(data) {
           alternative = "two.sided"
         )$n - (n.N + n.H)
       ), 0),
-    ) %>% 
-    mutate(across(where(is.numeric), round, 4)) %>%
-    select(couche, gene, n.N, n.H, p.val, Hedge.g, power, levene.p, expression, r2, add.n.for.nominal.power)
+    )
+    %>% mutate(across(where(is.numeric), round, 4))
+    %>% select(couche, gene, n.N, n.H, p.val, Hedge.g, power, levene.p, expression, r2, add.n.for.nominal.power)
+  )
 }
 
 # -------------------------------------------------------------

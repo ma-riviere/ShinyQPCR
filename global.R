@@ -120,7 +120,7 @@ update_packages <- function(pkgs) {
   renv::snapshot(type="all", prompt=F)
 }
 
-# update_packages(c("renv", "here", "glue", "styler", "remotes", "magrittr", "miniUI", "tools"))
+update_packages(c("renv", "here", "glue", "styler", "remotes", "magrittr", "miniUI", "tools"))
 
 
 remove_dependencies <- function(pkg, recursive = FALSE) {
@@ -143,7 +143,10 @@ pkg_list <- c(
   "shiny",
   "shinyjs",
   "tidyverse",
+  "data.table",
+  "markfairbanks/tidytable",
   "broom",
+  "janitor",
   # "lmerTest",
   # "broom.mixed",
   # "emmeans",
@@ -155,16 +158,16 @@ pkg_list <- c(
   "ggnewscale",
   'gtools',
   "rlist",
-  "promises",
-  "future",
-  "future.callr",
-  "ipc",
+  # "promises",
+  # "future",
+  # "future.callr",
+  # "ipc",
   "magrittr",
   "conflicted",
   "fitdistrplus",
   "goftest",
   "nortest",
-  "janitor",
+  
   "stringr",
   "shinydashboard",
   "dashboardthemes",
@@ -184,7 +187,7 @@ pkg_list <- c(
   "rsconnect"
 )
 
-# update_packages(pkg_list)
+update_packages(pkg_list)
 
 # TODO: automatically write those library() in an external R script and source it from the app.R
 ## TODO: detect the platform: only source that file if shinyapps 
@@ -231,6 +234,8 @@ library(XML)
 
 print("[INFO] Loading options")
 
+data.table::setDTthreads(parallel::detectCores(logical = TRUE))
+
 conflicted::conflict_prefer("filter", "dplyr", quiet = T)
 conflicted::conflict_prefer("group_by", "dplyr", quiet = T)
 conflicted::conflict_prefer("select", "dplyr", quiet = T)
@@ -248,7 +253,7 @@ alpha <- 0.05
 trend <- 0.1
 threshold.reg <- 1
 
-set.seed(42)
+set.seed(256)
 
 colors <- c("#00AFBB", "#FF7373")
 layer.order <- c("EGL", "EGLo", "EGLi", "ML", "MLPC", "PC", "IGL", "WM")

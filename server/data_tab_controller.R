@@ -3,7 +3,7 @@
 ## Tables
 
 output$data <- DT::renderDT({
-  df <- df_react() %>% select(couche, gene, sample, litter, condition, dct, fold)
+  df <- df_react() %>% select(couche, gene, sample, litter, condition, dct, fold, expression)
   datatable(
     df,
     class = "cell-border stripe compact",
@@ -12,17 +12,17 @@ output$data <- DT::renderDT({
       pageLength = 25,
       autoWidth = TRUE
     )
-  ) %>% formatRound(6:ncol(df), digits = 4)
+  ) %>% formatRound(6:7, digits = 4)
 })
 
 output$dl.raw.all <- downloadHandler(
   filename = function() {"raw_data_full.xlsx"},
-  content = function(file) {writexl::write_xlsx(df %>% select(couche, gene, sample, litter, condition, dct, fold), path = file)}
+  content = function(file) {writexl::write_xlsx(df %>% select(couche, gene, sample, litter, condition, dct, fold, expression), path = file)}
 )
 
 output$dl.raw.filtered <- downloadHandler(
   filename = function() {"raw_data_filtered.xlsx"},
-  content = function(file) {writexl::write_xlsx(df_react() %>% select(couche, gene, sample, litter, condition, dct, fold), path = file)}
+  content = function(file) {writexl::write_xlsx(df_react() %>% select(couche, gene, sample, litter, condition, dct, fold, expression), path = file)}
 )
 
 # output$ncbi <- DT::renderDT({
