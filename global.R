@@ -245,7 +245,7 @@ conflicted::conflict_prefer("layout", "plotly", quiet = T)
 conflicted::conflict_prefer("extract", "tidyr", quiet = T)
 
 options(install.packages.check.source = "no")
-options(dplyr.print_min = 6, dplyr.print_max = 6, scipen = 999, digits = 5)
+options(dplyr.print_min = 6, dplyr.print_max = 6, scipen = 1, digits = 4)
 options(spinner.color = "#0dc5c1")
 options(shiny.maxRequestSize = 30 * 1024^2)
 

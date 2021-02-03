@@ -77,8 +77,8 @@ add_expression <- function(dat) {
 }
 
 add_models <- function(dat) {
-  return(dat %>%
-           nest_by(couche, gene, .key = "dta")
+  return(dat
+         %>% nest_by(couche, gene, .key = "dta")
          %>% mutate(lm.mod = list(lm(dct ~ condition, data = dta)))
          %>% select.(-dta)
          %>% inner_join.(dat, by = c("couche", "gene"))
