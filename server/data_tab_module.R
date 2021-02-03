@@ -17,7 +17,7 @@ make_hist_stack <- function(id) {
 render_hist_stack <- function(input, output, session, data, options) {
   output$my_hist <- renderPlotly({
     hist <- data %>%
-      ggplot(aes(x = X, fill = condition, color = condition)) +
+      ggplot(aes(x = dct, fill = condition, color = condition)) +
       scale_fill_manual(values = colors) +
       scale_color_manual(values = colors) +
       geom_histogram(aes(y = ..density..), bins = options$nbins, alpha = 0.8, fill = "white", boundary = 1) +
@@ -28,11 +28,11 @@ render_hist_stack <- function(input, output, session, data, options) {
       # geom_vline(aes(xintercept = med, group = condition, color = condition), linetype = "dashed", size = 1) +
       geom_vline(aes(xintercept = med, group = condition, color = condition, label = "Median"), linetype = "dashed", size = 1) +
       geom_vline(aes(xintercept = mean, group = condition, color = condition, label = "Mean"), size = 1) +
-      geom_text(aes(x = med + 0.1 * (max(X) - min(X)), label = round(med, 2), y = -0.05)) # TODO: (get max of the density) + 0.1 * (max - min)
+      geom_text(aes(x = med + 0.1 * (max(dct) - min(dct)), label = round(med, 2), y = -0.05)) # TODO: (get max of the density) + 0.1 * (max - min)
     
     ggplotly(hist) %>%
       layout(
-        xaxis = list(title = ifelse(options$type == "dct", "Delta Ct", "Fold Change")),
+        xaxis = list(title = "Delta Ct"),
         yaxis = list(title = "Density") # range = c(0,9)
       )
   })

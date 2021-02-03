@@ -56,16 +56,13 @@ output$summary <- DT::renderDT({
 
 observe({
   req(df_react())
-  req(input$layers, input$genes, input$histograms_response_type, input$histograms_kde, input$histograms_nbin)
+  req(input$layers, input$genes, input$histograms_kde, input$histograms_nbin)
 
   df_temp <- df_react() %>%
-    rowwise() %>%
-    mutate(X = if_else(input$histograms_response_type == "dct", dct, fold)) %>%
-    ungroup() %>%
     group_by(couche, gene, condition) %>%
     mutate(
-      med = median(X),
-      mean = mean(X),
+      med = median(dct),
+      mean = mean(dct),
     ) %>%
     ungroup() %>%
     mutate(uid = paste0(couche, " - ", gene))
@@ -83,7 +80,7 @@ observe({
       render_hist_stack,
       id = .x$uid[1],
       data = .x,
-      options = list(type = input$histograms_response_type, nbins = input$histograms_nbin, kde = input$histograms_kde)
+      options = list(nbins = input$histograms_nbin, kde = input$histograms_kde)
     ))
 })
 
