@@ -144,7 +144,7 @@ pkg_list <- c(
   "shinyjs",
   "tidyverse",
   "data.table",
-  "markfairbanks/tidytable",
+  "tidytable",
   "broom",
   "janitor",
   # "lmerTest",
