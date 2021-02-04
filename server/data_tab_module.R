@@ -35,7 +35,7 @@ render_hist_stack <- function(input, output, session, data, options) {
         xaxis = list(title = "Delta Ct"),
         yaxis = list(title = "Density") # range = c(0,9)
       )
-  })
+  }) # %>% bindCache(input$layers, input$genes, options$nbins, options$kde, cache = "session")
 }
 
 # -------------------------------------------------------------------------
@@ -74,5 +74,5 @@ render_violin_stack <- function(input, output, session, data, options) {
         xaxis = list(title = "Condition"),
         yaxis = list(title = "Delta Ct") # range = c(0,9)
       )
-  })
+  }) #%>% bindCache(input$layers, input$genes, options$kde, cache = "session")
 }

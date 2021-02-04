@@ -38,7 +38,7 @@ output$dl.fit.filtered <- downloadHandler(
 
 observe({
   req(df_react())
-  req(input$layers, input$genes)
+  req(input$go)
   
   df_temp <- df_react() %>%
     # group_by(couche, gene, condition) %>%
@@ -68,7 +68,7 @@ observe({
 
 observe({
   req(df_react())
-  req(input$layers, input$genes)
+  req(input$go)
   
   df_temp <- df_react() %>%
     # group_by(couche, gene, condition) %>%
@@ -140,7 +140,7 @@ output$dl.stats.filtered <- downloadHandler(
 
 observe({
   req(df_react())
-  req(input$layers, input$genes)
+  req(input$go)
   
   df_temp <- df_react() %>%
     group_by(couche, gene, condition) %>%
@@ -194,7 +194,12 @@ make.heatmap <- function(data) {
 
 output$heatmap <- renderPlot(
   make.heatmap(df_react())
-)
+) #%>% {
+#   if_else(
+#     !is.null(input$layers) & input$layers != "All" & !is.null(input$genes) & input$genes != "All", 
+#     bindCache(input$layers, input$genes, cache = "session"), 
+#     . )
+# }
 
 output$dl.hm.full <- downloadHandler(
   filename = function() {"heatmap_full.png"},

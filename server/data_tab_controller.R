@@ -56,7 +56,7 @@ output$summary <- DT::renderDT({
 
 observe({
   req(df_react())
-  req(input$layers, input$genes, input$histograms_kde, input$histograms_nbin)
+  req(input$go, input$histograms_kde, input$histograms_nbin)
 
   df_temp <- df_react() %>%
     group_by(couche, gene, condition) %>%
@@ -88,7 +88,7 @@ observe({
 
 observe({
   req(df_react())
-  req(input$layers, input$genes, input$violins_kde)
+  req(input$go, input$violins_kde)
 
   df_temp <- df_react() %>%
     group_by(couche, gene, condition) %>%

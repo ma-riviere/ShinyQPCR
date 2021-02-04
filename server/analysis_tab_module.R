@@ -30,7 +30,7 @@ render_qq_stack <- function(input, output, session, data, options) {
         xaxis = list(title = "Theoretical"),
         yaxis = list(title = "Observed") # range = c(0,9)
       )
-  })
+  }) #%>% bindCache(input$layers, input$genes, cache = "session")
 }
 
 # -------------------------------------------------------------------------
@@ -68,7 +68,7 @@ render_fit_stack <- function(input, output, session, data, options) {
         axis.title.y = element_text(size = (20)), 
         # legend.text = element_text(size = (16))
       )
-  })
+  }) #%>% bindCache(input$layers, input$genes, cache = "session")
 }
 
 # -------------------------------------------------------------------------
@@ -97,5 +97,5 @@ render_box_stack <- function(input, output, session, data, options) {
     # facet_wrap(~ couche + gene, ncol = wrap_ncol, scales = "free_y")
     
     ggplotly(box)
-  })
+  }) #%>% bindCache(input$layers, input$genes, cache = "session")
 }
